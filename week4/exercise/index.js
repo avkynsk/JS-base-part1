@@ -34,10 +34,11 @@ function query(collection) {
                 }
             }
             if(bool == false){
-                delete element.keys[i];//здесь ломается
+                delete element[keys[i]];
             }
         }
     });
+
 }
 
 /**
