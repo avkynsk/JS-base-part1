@@ -20,12 +20,48 @@ function query(collection) {
                 selections.push(command[1][i]);
             }
         } else if(command[0] === 'filterIn') {
-            Object.defineProperty(filters, command[1], {
-                writable: true,
-                enumerable: true,
-                configurable: true,
-                value: command[2]
-            });
+            let keys = Object.keys(filters);
+            if(keys.length == 0){
+                Object.defineProperty(filters, command[1], {
+                    writable: true,
+                    enumerable: true,
+                    configurable: true,
+                    value: command[2]
+                });
+            } else {
+            for(let i = 0; i < keys.length; i++){
+                if(keys[i] == command[1]){
+                    for(let j = 0; j < keys[i].length; j++){
+                        let bool = false;
+                        for(let p = 0; p < command[2].length; p++){
+                            if(filters[keys[i]][j] === command[2][p]){
+                                bool = true;
+                                let arr = [];
+                                arr.push(command[2][p]);
+                                Object.defineProperty(filters, command[1], {
+                                    writable: true,
+                                    enumerable: true,
+                                    configurable: true,
+                                    value: arr
+                                });
+                                break;
+                            }
+                        }
+                        if(bool == false){
+                            Object.defineProperty(filters, command[1], {
+                                writable: true,
+                                enumerable: true,
+                                configurable: true,
+                                value: []
+                            });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+            }
         }
     });
 
