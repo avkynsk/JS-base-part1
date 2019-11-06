@@ -13,12 +13,29 @@ function query(collection) {
     //принимаеm команды
     let commads = [].slice.call(arguments, 1),
         selections = [],
-        filters = {};
+        filters = {},
+        selectcall = 0;
     commads.forEach(function(command){
         if(command[0] === 'select'){
             for(let i = 0; i < command[1].length; i++){
-                selections.push(command[1][i]);
+                if(selectcall == 0){
+                    selections.push(command[1][i]);
+                    
+                } else {
+                    if(selectcall > 1){
+                        let arr = [];
+                        for(let j = 0; j < selections.length; j++){
+                            if(command[1][i] == selections[j]){
+                                arr.push(command[1][i]);
+                                break;
+                            }
+                        }
+                        selections = arr.slice();
+                        break;
+                    }
+                }
             }
+            selectcall++;
         } else if(command[0] === 'filterIn') {
             let keys = Object.keys(filters);
             if(keys.length == 0){
@@ -59,6 +76,13 @@ function query(collection) {
                             break;
                         }
                     }
+                } else {
+                    Object.defineProperty(filters, command[1], {
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                        value: command[2]
+                    });
                 }
             }
             }
@@ -73,11 +97,13 @@ function query(collection) {
         let keyFilter = Object.keys(filters);
         for(let i = 0; i < keys.length; i++){
             let bool = true;
-            if(keys[i] == keyFilter.join()){
-                bool = false;
-                for(let j = 0; j < filters[keyFilter[0]].length; j++){
-                    if(filters[keyFilter[0]][j] === element[keys[i]]){
-                        bool = true;
+            for(let j = 0; j < keyFilter.length; j++){
+                if(keys[i] == keyFilter[j]){
+                    bool = false;
+                    for(let p = 0; p < filters[keyFilter[j]].length; p++){
+                        if(filters[keyFilter[j]][p] === element[keys[i]]){
+                            bool = true;
+                        }
                     }
                 }
             }
@@ -85,6 +111,7 @@ function query(collection) {
                 for(let i = 0; i < keys.length; i++){
                     delete element[keys[i]];
                 }
+                break;
             }
         }
     });
