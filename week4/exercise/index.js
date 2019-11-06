@@ -19,11 +19,41 @@ function query(collection) {
             for(let i = 0; i < command[1].length; i++){
                 selections.push(command[1][i]);
             }
-        } else if(command[0] === 'filter') {
-            //здесь принимаем аргументы filterIn
+        } else if(command[0] === 'filterIn') {
+            Object.defineProperty(filters, command[1], {
+                writable: true,
+                enumerable: true,
+                configurable: true,
+                value: command[2]
+            });
         }
     });
 
+
+
+    //filter
+    copyCollection.forEach(function(element){
+        let keys = Object.keys(element);
+        let keyFilter = Object.keys(filters);
+        for(let i = 0; i < keys.length; i++){
+            let bool = true;
+            if(keys[i] == keyFilter.join()){
+                bool = false;
+                for(let j = 0; j < filters[keyFilter[0]].length; j++){
+                    if(filters[keyFilter[0]][j] === element[keys[i]]){
+                        bool = true;
+                    }
+                }
+            }
+            if(bool == false){
+                for(let i = 0; i < keys.length; i++){
+                    delete element[keys[i]];
+                }
+            }
+        }
+    });
+
+    //здесь select
     copyCollection.forEach(function(element){
         let keys = Object.keys(element);
         for(let i = 0; i < keys.length; i++){
@@ -39,6 +69,17 @@ function query(collection) {
         }
     });
 
+    //удаляем пустые объекты
+    let fixCollection = copyCollection;
+    copyCollection = fixCollection.filter(function(element){
+        let keys = Object.keys(element);
+        if(keys.length == 0){
+            return false;
+        }
+        return true;
+    });
+
+    return copyCollection;
 }
 
 /**
