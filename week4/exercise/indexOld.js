@@ -17,18 +17,28 @@ function query(collection) {
         selectcall = 0;
     commads.forEach(function(command){
         if(command[0] === 'select'){
-            let keys = Object.keys(copyCollection[0]);
-            let arrSelect = intersectCollection(command[1], keys);
-            
-            if(selectcall == 0){
-                selections = arrSelect;
-            } else {
-                selections = intersectCollection(selections, arrSelect);
+            for(let i = 0; i < command[1].length; i++){
+                if(selectcall == 0){
+                    selections.push(command[1][i]);
+                    
+                } else {
+                    if(selectcall > 1){
+                        let arr = [];
+                        for(let j = 0; j < selections.length; j++){
+                            if(command[1][i] == selections[j]){
+                                arr.push(command[1][i]);
+                                break;
+                            }
+                        }
+                        selections = arr.slice();
+                        break;
+                    }
+                }
             }
-            
             selectcall++;
         } else if(command[0] === 'filterIn') {
-            if(Object.keys(filters).length == 0){
+            let keys = Object.keys(filters);
+            if(keys.length == 0){
                 Object.defineProperty(filters, command[1], {
                     writable: true,
                     enumerable: true,
@@ -36,27 +46,37 @@ function query(collection) {
                     value: command[2]
                 });
             } else {
-                for(let key in filters){
-                    if(command[1] == key){
-                        for(let i = 0; i < command[2].length; i++){
-                            filters[key].push(command[2][i]);
-                        }
-                        filters[key].forEach(function(element, index){
-                            for(let i = index + 1; i < filters[key].length + 1; i++){
+            for(let i = 0; i < keys.length; i++){
+                if(keys[i] == command[1]){
+                    for(let j = 0; j < keys[i].length; j++){
+                        let bool = false;
+                        for(let p = 0; p < command[2].length; p++){
+                            if(filters[keys[i]][j] === command[2][p]){
+                                bool = true;
                                 let arr = [];
-                                if(element == filters[key][i]){
-                                    arr.push(element);                                   
-                                }
+                                arr.push(command[2][p]);
                                 Object.defineProperty(filters, command[1], {
                                     writable: true,
                                     enumerable: true,
                                     configurable: true,
                                     value: arr
                                 });
-                            }   
-                        });
-                        break;
+                                break;
+                            }
+                        }
+                        if(bool == false){
+                            Object.defineProperty(filters, command[1], {
+                                writable: true,
+                                enumerable: true,
+                                configurable: true,
+                                value: []
+                            });
+                            break;
+                        } else {
+                            break;
+                        }
                     }
+                } else {
                     Object.defineProperty(filters, command[1], {
                         writable: true,
                         enumerable: true,
@@ -65,21 +85,11 @@ function query(collection) {
                     });
                 }
             }
+            }
         }
     });
 
-    if(selections.length == 0){
-        for(let i = 0; i < Object.keys(copyCollection[0]).length; i++){
-            selections.push(Object.keys(copyCollection[0])[i]);
-        }
-    }
 
-    for(let key in filters){
-        if(filters[key].length == 0){
-            delete filters[key]
-        }
-    }
-    
 
     //filter
     copyCollection.forEach(function(element){
@@ -162,23 +172,8 @@ function doCopyCollection(arr){
     return newArray;
 }
 
-function intersectCollection(arr1, arr2){
-    let result = [];
-
-    arr1.forEach(function(element1){
-        arr2.forEach(function(element2) {
-           if(element1 === element2) {
-               result.push(element2);
-           }
-        });
-    });
-
-    return result;
-}
-
 module.exports = {
     query: query,
     select: select,
-    filterIn: filterIn,
-    intersectCollection: intersectCollection
+    filterIn: filterIn
 };
