@@ -24,14 +24,28 @@ module.exports = {
      * @param {Object} subscriber
      */
     off: function (event, subscriber) {
-
+        if(events[event] !== undefined){
+            for(let i = events[event].length - 1; i >= 0; --i){
+                if(events[event][i].subscriber == subscriber){
+                    events[event].splice(i, 1);
+                    
+                }
+            }
+            if(events[event].length == 0){
+                delete events[event];
+            }
+        }
+        if(events.hasOwnProperty(event) && subscriber == undefined){
+            events[event].splice(0,events[event].length);
+        }
+        return this;
     },
 
     /**
      * @param {String} event
      */
     emit: function (event) {
-        if(events[event] != undefined){
+        if(events[event] !== undefined){
             for(let i = 0; i < events[event].length; i++){
                 events[event][i].handler();
             }
