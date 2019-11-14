@@ -9,7 +9,14 @@ module.exports = {
      * @param {Function} handler
      */
     on: function (event, subscriber, handler) {
-
+        if(events[event] == undefined){
+            events[event] = [];
+        }
+        events[event].push({
+            subscriber: subscriber,
+            handler: handler.bind(subscriber)
+        });
+        return this;
     },
 
     /**

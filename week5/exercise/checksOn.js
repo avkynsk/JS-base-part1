@@ -15,4 +15,4 @@ var logger = {
 
 emitter.on('new_notification', notifications, notifications.count);
 
-assert.equal(notifications.counter, 1, 'Получена одна нотификация');
+assert.equal(notifications.counter, 0);
