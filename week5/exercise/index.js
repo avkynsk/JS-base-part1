@@ -31,6 +31,11 @@ module.exports = {
      * @param {String} event
      */
     emit: function (event) {
-
+        if(events[event] != undefined){
+            for(let i = 0; i < events[event].length; i++){
+                events[event][i].handler();
+            }
+        }
+        return this;
     }
 };
